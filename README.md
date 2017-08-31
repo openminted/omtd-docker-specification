@@ -1,2 +1,4 @@
 # omtd-docker-specification
 The specification for creating Docker images in OpenMinTeD, rendered in asciidoc
+
+AsciiDoc is generated automatically using the Google Docs Add-On 'AsciiDoc Processor' from https://chrome.google.com/webstore/detail/asciidoc-processor/eghlmnhjljbjodpeehjjcgfcjegcfbhk 
