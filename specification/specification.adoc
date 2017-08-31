@@ -3,8 +3,10 @@
 
 
 This document explains: 
- . How an OMTD-compliant docker image that contains TDM component(s) should be built.
- . The external interface that the docker image must follow.
+
+. How an OMTD-compliant docker image that contains TDM component(s) should be built.
+. The external interface that the docker image must follow.
+
 The above two are required in order to make the docker image usable within the OpenMinTeD platform; for example if a TDM component is dockerized according to the given specifications then the OMTD Workflow Service (e.g. based on Galaxy workflow execution engine) will be able to call it.
 
 == Metadata recommendations 
@@ -16,7 +18,7 @@ The metadata elements we will mention in the following specification are the one
  * *<resourceIdentifier>*: set the component id; for dockerized components, the name used to invoke the component. 
  * *<command>*: what is used for invoking the component(s)
  * *<inputContentResourceInfo>*: set of elements with the specs for the input resource (i.e. the corpus or document) that will be processed by the component
- * *<outputResourceInfo>: *set of elements with the specs for the output resource (i.e. annotations) that will be produced by the component
+ * *<outputResourceInfo>*: set of elements with the specs for the output resource (i.e. annotations) that will be produced by the component
  * *<parameterInfos>*: set of elements used for describing the parameters used when running a component
  * *<distributionLocation>*: the place where components can be accessed from; for dockerized components, these are the docker coordinates following the Docker conventions
 
@@ -29,31 +31,53 @@ The OMTD docker image and TDM component that it hosts must follow a set of speci
 
 === The docker image must contain at least one TDM component 
 
-There must be a unique name for each component. The name is responsible for invoking a TDM component or workflow. 
- * The component name must be a parameter that invokes a unique component within the *docker run *command.
+* There must be a unique name for each component. The name is responsible for invoking a TDM component or workflow. 
+* The component name must be a parameter that invokes a unique component within the *docker run* command.
 
-In the OMTD-SHARE descriptor, the component name is described using the *resourceIdentifier*** **element as in the following example(s).
+In the OMTD-SHARE descriptor, the component name is described using the *resourceIdentifier* element as in the following example(s).
 
-|===
-|+++<u>+++*+Alvis component:+*+++</u>+++
+[source,xml]
+.Alvis Component
+----
+<resourceIdentifier resourceIdentifierSchemeName=”docker”>
+  default.modules.simpleprojector
+</resourceIdentifier>
+----
 
-|===
+[source,xml]
+.UIMA/DKPro component
+----
+<resourceIdentifier resourceIdentifierSchemeName=”docker”>
+  de.tudarmstadt.ukp.dkpro.core.mallet.lda.MalletLdaTopicModelInferencer
+</resourceIdentifier> 
+----
+
+
 
 === The docker image must include a TDM component executable
 
-There must be an executable (e.g. based on docker ENTRYPOINT) which is used as the entry point for the docker image. This executable is responsible for executing TDM component(s) or workflow(s). 
+* There must be an executable (e.g. based on docker ENTRYPOINT) which is used as the entry point for the docker image.
+* This executable is responsible for executing TDM component(s) or workflow(s). 
 The executable must be a parameter that invokes one of the components in the docker run command, since a docker image can contain more than one TDM components, 
 
 In the OMTD-SHARE descriptor, the executable is described using the *command* element as in the example(s) below. The value of the *command* element must contain the executable (e.g., _alvisnlp_). That value is a string, without any special character.
 
-|===
-|*+Alvis TDM executable+*
+[source,xml]
+.Alvis TDM executable
+----
+<command>alvisnlp</command>
+----
 
-|===
+[source,xml]
+.DKPro TDM executable
+----
+<command>dkpro-core</command>
+----
+
 === Reading input data and writing output data for each TDM component
 
  * The component must  specify inputs and outputs as parameters to the *docker run* command in its OMTD-SHARE descriptor.
- * It must be possible to set (with a parameter named *--input*) the input in the *docker run* in the following format :
+ * It must be possible to set (with a parameter named *--input*) the input in the *docker run* in the following format:
 			--input <PATH-TO-THE-INPUT-DATA>
 
  * It must be possible to set (with a parameter named *--output*) the output in the docker run in the following format: 
@@ -62,17 +86,48 @@ In the OMTD-SHARE descriptor, the executable is described using the *command* el
  * There must not be any additional parameters to indicate data input/output locations
  * Input and output data must be expected as files
  * The input and output files must be in one of the formats declared in the OMTD-SHARE descriptor
- * If a component declares multiple input/output formats in its OMTD-SHARE descriptor, there must be parameters called* --input-format/--output-format* which indicates which input/output format to use. 
+ * If a component declares multiple input/output formats in its OMTD-SHARE descriptor, there must be parameters called *--input-format*/*--output-format* which indicates which input/output format to use. 
 
-In the OMTD descriptor, the metadata for the input and the output are provided respectively into the *inputContentResourceInfo* and *outputResourceInfo *elements*. *At least values for the *processingResourceTypes*, *dataFormats *and* characterEncodings* sub-elements must be filled in.
+In the OMTD descriptor, the metadata for the input and the output are provided respectively into the *inputContentResourceInfo* and *outputResourceInfo* elements. At least values for the *processingResourceTypes*, *dataFormats* and *characterEncodings* sub-elements must be filled in.
 
-|===
-|+<++inputContentResourceInf++o>+
+[source,xml]
+----
+<inputContentResourceInfo>
+  <processingResourceTypes> 
+    <processingResourceType>corpus</processingResourceType>
+  </processingResourceTypes> 
+  <dataFormats> 
+    <dataFormatInfo> 
+      <dataFormat>application/vnd.xmi+xml</dataFormat> 
+      <mimeType>application/vnd.xmi+xml</mimeType> 
+    <dataFormatInfo> 
+  </dataFormats> 
+  <characterEncodings> 
+    <characterEncoding>UTF8</characterEncoding> 
+  </characterEncodings>
+  [...]
+</inputContentResourceInfo>
+<outputResourceInfo>
+  <processingResourceTypes> 
+    <processingResourceType>corpus</processingResourceType>
+  </processingResourceTypes>
+  <dataFormats> 
+    <dataFormatInfo> 
+      <dataFormat>web annotation</dataFormat> 
+      <mimeType>application/json+ld</mimeType> 
+    <dataFormatInfo> 
+  </dataFormats> 
+  <characterEncodings> 
+    <characterEncoding>UTF8</characterEncoding> 
+  </characterEncodings>
+  [...]
+</outputResourceInfo>
+----
 
-|===
+
 === Accepting parameters for each TDM component
 
- * If the component declares a parameter in its OMTD-SHARE descriptor, then it must be possible to specify this parameter in the *docker run *in the following format: *--param:<PARAMETER-NAME>=<PARAMETER-VALUE>*
+ * If the component declares a parameter in its OMTD-SHARE descriptor, then it must be possible to specify this parameter in the *docker run* in the following format: *--param:<PARAMETER-NAME>=<PARAMETER-VALUE>*
  * If a parameter accepts multiple values, then these must be comma-separated
  * If a value contains a comma, it must be escaped using a backslash: \,
  * If a value contains a backslash, it must be escaped using a second backslash: \\
@@ -80,64 +135,37 @@ In the OMTD descriptor, the metadata for the input and the output are provided r
 
 In the OMTD description, the metadata for the parameters are filled in the *parameterInfo* element. Values for the *name*, *parameterType*, *optional* sub-elements are required. The following example describes a parameter.
 
-|===
-|+<parameterInfo> +
+[source,xml]
+----
+<parameterInfo> 
+  <parameterName>targetlayerName</parameterName> 
+  <parameterLabel>target Name Layer</parameterLabel> 
+  <parameterDescription>
+    Name of the layer that contains the match annotations.
+  </parameterDescription> 
+  <parameterType>string</parameterType> 
+  <optional>true</optional> 
+  <multiValue>false</multiValue> 
+  <defaultValue>concepts</defaultValue> 
+</parameterInfo>
+----
 
-|===
+
 === Fully identify the docker image
 
  * following the docker convention, each image must have a full tag composed of a repository name, a specific tag  and a version of the image (e.g., {repository-name}/{specific-tag}:{version})
 
-In the OMTD descriptor, the tag/coordinates of the docker image is encoded in the *distributionLocation* element, as in the example below where *bibliome* is the repository name, *alvisengine* is the specific tag used to name the alvis image and* 1.0.0 *is the version of the image*. *
+In the OMTD descriptor, the tag/coordinates of the docker image is encoded in the *distributionLocation* element, as in the example below where *bibliome* is the repository name, *alvisengine* is the specific tag used to name the alvis image and *1.0.0* is the version of the image.
 
-|===
-|+<distributionLocation>bibliome/alvisengine:1.0.0</distributionLocation>+
+[source,xml]
+----
+<distributionLocation>bibliome/alvisengine:1.0.0</distributionLocation>
+----
 
-|===
 === Package for the dockerized components
 
 
  * Up-to-date version of the dockerfile and the required resources for the build process : the build process must end up with a docker image containing the component(s)
  * The OMTD descriptor of the docker-based component respecting the above specifications, If there is more than one component in the docker image, each component must have its own OMTD descriptor.
- * These can be uploaded to the registry by creating or editing an OMTD-SHARE metadata record. (This is still under developement at: https://docs.google.com/document/d/1bRzatRcebkAI0V2ORMy-ZVbezDrclmdnPvnMbnuCRmk/edit#heading=h.ns8v35e59ye3[https://docs.google.com/document/d/1bRzatRcebkAI0V2ORMy-ZVbezDrclmdnPvnMbnuCRmk/edit#heading=h.ns8v35e59ye3])
-
-
-
-
-
-
-== Appendix A: How OpenMinTeD creates a Galaxy Tool Description from the OMTD-SHARE descriptor
-
-To identify the docker image the Galaxy https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-requirements[*requirements]* element of Galaxy Tool XML File is used. `requirements` will contain the `container` element that contains the tag identifying the docker image to use and the container type  (in this case, it’s a docker container) in the `type` attribute, as follows.
-
-|===
-|+<requirements>+
-
-|===
-
-The image name and version used inside the container element is obtained from the value of the *componentDistributionInfo/componentLoc/distributionLocation* element.
-
-Next, the Galaxy https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-command[*command]* element is generated. As mentioned before, every docker image must contain an executable*. *In the example _alvisnlp_ is the entry point, _simpleProjector _is the name of the component to invoke into the docker container. The rest of the command is composed of the input, output and parameters to use with the component (see parameterInfo example above). They are generated from the *inputContentResourceInfo*, *outputResourceInfo* and *parameterInfo.*
-
-|===
-|+ <command>+
-
-|===
-
-Some parameters are optional. If optional parameters are not set, then they are also not passed to the component. To handle this, we generate a conditional statement:
-
-|===
-| <command>
-
-|===
-
-
-
-
-A complete example of XML wrapper (of a component that will run into a docker container) from the OMTD description is provided https://github.com/openminted/alvis-docker/blob/master/documentation/simpleprojector_Galaxy_Wrapper.xml[here].
-
-The OMTD Galaxy instance manages the lifecycle of the docker containers (e.g., pull images, run images, mount folders for inputs/outputs, kill containers, etc.). We assume that the required configuration including the security aspect is guaranteed by OpenMinTeD.
-
-
-
+These can be uploaded to the registry by creating or editing an OMTD-SHARE metadata record. (This is still under developement at: https://docs.google.com/document/d/1bRzatRcebkAI0V2ORMy-ZVbezDrclmdnPvnMbnuCRmk/edit#heading=h.ns8v35e59ye3)
 
