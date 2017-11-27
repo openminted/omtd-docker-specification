@@ -1,7 +1,5 @@
 = How to create OMTD-compliant dockerized components 
 
-
-
 This document explains: 
 
 . How an OMTD-compliant docker image that contains TDM component(s) should be built.
