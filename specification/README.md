@@ -1,4 +1,0 @@
-# OpenMinTeD Docker Specification
-
-
-
