@@ -67,7 +67,7 @@ In the OMTD-SHARE descriptor, the executable is described using the *command* el
 ----
 
 [source,xml]
-.DKPro TDM executable
+.DKPro Core TDM executable
 ----
 <command>dkpro-core</command>
 ----
@@ -81,10 +81,11 @@ In the OMTD-SHARE descriptor, the executable is described using the *command* el
  * It must be possible to set (with a parameter named *--output*) the output in the docker run in the following format: 
 		--output <PATH-TO-THE-OUTPUT-DATA>
 
- * There must not be any additional parameters to indicate data input/output locations
- * Input and output data must be expected as files
+ * There must not be any additional parameters to indicate data input/output locations. The *--input* and *--output* parameters may appear only once and only take a single value.
+ * Input and output data located in the directories indicated by the *--input* and *--output* parameters are expected to be files
  * The input and output files must be in one of the formats declared in the OMTD-SHARE descriptor
- * If a component declares multiple input/output formats in its OMTD-SHARE descriptor, there must be parameters called *--input-format*/*--output-format* which indicates which input/output format to use. 
+ * If a component declares multiple input/output formats in its OMTD-SHARE descriptor, there must be parameters called *--input-format*/*--output-format* which indicates which input/output format to use. The component is expected to look for relevant data files in the input folder depending on the specified input format. E.g if the input format is `application/vnd.xmi+xml`, then the componen should look for all files with the ending `.xmi` in the input folder. Likewise, the component should generate files with extensions appropriate to the specified output format in the output folder.
+ * The *--input-format*/*--output-format* may each appear only once and take only a single value
 
 In the OMTD descriptor, the metadata for the input and the output are provided respectively into the *inputContentResourceInfo* and *outputResourceInfo* elements. At least values for the *processingResourceTypes*, *dataFormats* and *characterEncodings* sub-elements must be filled in.
 
